@@ -1,6 +1,6 @@
 use std::fs::File;
-
-use std::io::{self, BufRead, BufReader, Read};
+use std::env;
+use std::io::{self, Read};
 
 fn read_file_to_string(filepath: &str) -> io::Result<String> {
     let mut file = File::open(filepath)?;
@@ -10,9 +10,25 @@ fn read_file_to_string(filepath: &str) -> io::Result<String> {
 }
 
 fn main() {
-    println!("got: {}", part1("Inputs/Day3/input.txt"));
-    println!("got: {}", part2("Inputs/Day3/input.txt"));
+    let args: Vec<u8> = env::args()
+        .skip(1)
+        .map(|arg| arg.parse::<u8>().expect("Invalid arguments"))
+        .collect();
+
+    if args.len() > 0 {
+        for arg in args {
+            match arg {
+                1 => println!("{}", part1("Inputs/Day3/input.txt")),
+                2 => println!("{}", part2("Inputs/Day3/input.txt")),
+                _ => panic!("Invalid part"),
+            }
+        }
+    } else {
+        println!("{}", part1("Inputs/Day3/input.txt"));
+        println!("{}", part2("Inputs/Day3/input.txt"));
+    }
 }
+
 
 fn try_mul(line: &str, i: usize) -> usize {
     let mul = line.get(i..).unwrap();
@@ -86,7 +102,7 @@ fn part2(file_name: &str) -> usize {
         i -= 1;
         let mut keep = true;
         for ex in &disable_zones {
-            println!("dont {} do {}", ex.0, ex.1);
+            //println!("dont {} do {}", ex.0, ex.1);
             if ex.0 < muls[i] && ex.1 > muls[i] {
                 keep = false;
             }
@@ -102,7 +118,6 @@ fn part2(file_name: &str) -> usize {
     }
     return res;
 }
-
 
 #[cfg(test)]
 mod tests {

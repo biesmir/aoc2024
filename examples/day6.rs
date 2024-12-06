@@ -55,7 +55,7 @@ fn turn_right(pos: &mut ((usize, usize), (isize, isize))) {
     }
 }
 
-fn one_step(map: &Vec<Vec<char>>, pos: &mut ((usize, usize), (isize, isize))) -> bool{
+fn one_step(map: &Vec<Vec<char>>, pos: &mut ((usize, usize), (isize, isize))) -> bool {
     let newposy: isize = pos.0 .0 as isize + pos.1 .0;
     let newposx: isize = pos.0 .1 as isize + pos.1 .1;
 
@@ -110,7 +110,7 @@ fn part1(file_name: &str) -> usize {
     return visited.len();
 }
 
-fn is_looped(matrix:&Vec<Vec<char>>)-> bool{
+fn is_looped(matrix: &Vec<Vec<char>>) -> bool {
     let mut visited: HashSet<(usize, usize)> = HashSet::new();
     let mut positions: HashSet<((usize, usize), (isize, isize))> = HashSet::new();
     let mut start_pos: ((usize, usize), (isize, isize)) = ((0, 0), (0, 0));
@@ -133,7 +133,7 @@ fn is_looped(matrix:&Vec<Vec<char>>)-> bool{
     visited.insert((pos.0 .0, pos.0 .1));
 
     while one_step(&matrix, &mut pos) {
-        if positions.contains(&pos){
+        if positions.contains(&pos) {
             return true;
         }
         positions.insert(pos);
@@ -142,25 +142,54 @@ fn is_looped(matrix:&Vec<Vec<char>>)-> bool{
     return false;
 }
 
+fn get_original_path(matrix: &Vec<Vec<char>>) -> HashSet<(usize, usize)> {
+    let mut visited: HashSet<(usize, usize)> = HashSet::new();
+    let mut positions: HashSet<((usize, usize), (isize, isize))> = HashSet::new();
+    let mut start_pos: ((usize, usize), (isize, isize)) = ((0, 0), (0, 0));
+    for i in 0..matrix.len() {
+        for j in 0..matrix[0].len() {
+            if matrix[i][j] == '^' {
+                start_pos = ((i, j), (-1, 0));
+                positions.insert(start_pos);
+                break;
+            }
+        }
+    }
+    let start_pos = start_pos;
+    let mut pos = start_pos;
+    let newposy: isize = pos.0 .0 as isize + pos.1 .0;
+    let newposx: isize = pos.0 .1 as isize + pos.1 .1;
+    pos.0 .0 = newposy.try_into().unwrap();
+    pos.0 .1 = newposx.try_into().unwrap();
+    visited.insert((pos.0 .0, pos.0 .1));
+
+    while one_step(&matrix, &mut pos) {
+        positions.insert(pos);
+        visited.insert((pos.0 .0, pos.0 .1));
+    }
+    return visited;
+}
+
 fn part2(file_name: &str) -> usize {
     let matrix = read_file_to_char_matrix(file_name).unwrap();
     let mut res = 0;
-    for i in 0..matrix.len() {
-        for j in 0..matrix[0].len() {
-            if matrix[i][j] == '.' {
-                let mut map = matrix.clone();
-                map[i][j] = '#';
-                if is_looped(&map){
-                    res += 1;
-                }
-            }
 
+    let to_check = get_original_path(&matrix);
+
+    for field in to_check {
+        let i = field.0;
+        let j = field.1;
+
+        if matrix[i][j] == '.' {
+            let mut map = matrix.clone();
+            map[i][j] = '#';
+            if is_looped(&map) {
+                res += 1;
+            }
         }
     }
     res
 }
-
-
 
 #[cfg(test)]
 mod tests {
